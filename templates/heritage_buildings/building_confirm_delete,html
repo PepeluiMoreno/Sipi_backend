@@ -1,0 +1,18 @@
+<!-- heritage_defense/apps/heritage_buildings/templates/heritage_buildings/building_confirm_delete.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md">
+    <h2 class="text-2xl font-bold mb-6">¿Eliminar Inmueble?</h2>
+    <p>¿Estás seguro de que deseas eliminar "{{ building.name }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+            Eliminar
+        </button>
+        <a href="{% url 'building_list' %}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+            Cancelar
+        </a>
+    </form>
+</div>
+{% endblock %}

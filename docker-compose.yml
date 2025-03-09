@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:13
+    container_name: db
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    networks:
+      - internal_network
+
+  web:
+    build: .
+    container_name: web
+    env_file:
+      - .env
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py createsuperuser_custom &&
+             gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+          
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - internal_network
+      - external_network
+     
+networks:
+  internal_network:
+    name: internal_network
+    internal: true
+  external_network:
+    name: external_network
+    driver : bridge
