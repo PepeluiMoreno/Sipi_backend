@@ -1,0 +1,22 @@
+[
+    {
+        "id": "1",
+        "denominacion": "nota simple"
+    },
+    {
+        "id": "2",
+        "denominacion": "ficha catastral"
+    },
+    {
+        "id": "3",
+        "denominacion": "anuncio venta"
+    },
+    {
+        "id": "4",
+        "denominacion": "fotografia"
+    },
+    {
+        "id": "5",
+        "denominacion": "video"
+    }
+]

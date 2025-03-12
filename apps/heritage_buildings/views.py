@@ -3,88 +3,88 @@
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import building, document
+from .models import Edificio, Documento
 from .forms import BuildingForm, DocumentForm
 
 @login_required
 def building_list(request):
-    buildings = building.objects.all()
+    buildings = Edificio.objects.all()
     return render(request, 'heritage_buildings/building_list.html', {'buildings': buildings})
 
 @login_required
 def building_detail(request, pk):
-    building = get_object_or_404(building, pk=pk)
-    return render(request, 'heritage_buildings/building_detail.html', {'building': building})
+    Edificio = get_object_or_404(Edificio, pk=pk)
+    return render(request, 'heritage_buildings/building_detail.html', {'Edificio': Edificio})
 
 @login_required
 def building_create(request):
     if request.method == 'POST':
         form = BuildingForm(request.POST)
         if form.is_valid():
-            building = form.save(commit=False)
-            building.save()
-            return redirect('building_detail', pk=building.pk)
+            Edificio = form.save(commit=False)
+            Edificio.save()
+            return redirect('building_detail', pk=Edificio.pk)
     else:
         form = BuildingForm()
     return render(request, 'heritage_buildings/building_form.html', {'form': form})
 
 @login_required
 def building_edit(request, pk):
-    building = get_object_or_404(building, pk=pk)
+    Edificio = get_object_or_404(Edificio, pk=pk)
     if request.method == 'POST':
-        form = BuildingForm(request.POST, instance=building)
+        form = BuildingForm(request.POST, instance=Edificio)
         if form.is_valid():
-            building = form.save()
-            return redirect('building_detail', pk=building.pk)
+            Edificio = form.save()
+            return redirect('building_detail', pk=Edificio.pk)
     else:
-        form = BuildingForm(instance=building)
+        form = BuildingForm(instance=Edificio)
     return render(request, 'heritage_buildings/building_form.html', {'form': form})
 
 @login_required
 def building_delete(request, pk):
-    building = get_object_or_404(building, pk=pk)
+    Edificio = get_object_or_404(Edificio, pk=pk)
     if request.method == 'POST':
-        building.delete()
+        Edificio.delete()
         return redirect('building_list')
-    return render(request, 'heritage_buildings/building_confirm_delete.html', {'building': building})
+    return render(request, 'heritage_buildings/building_confirm_delete.html', {'Edificio': Edificio})
 
 @login_required
 def document_list(request):
-    documents = document.objects.all()
+    documents = Documento.objects.all()
     return render(request, 'heritage_buildings/document_list.html', {'documents': documents})
 
 @login_required
 def document_detail(request, pk):
-    document = get_object_or_404(document, pk=pk)
-    return render(request, 'heritage_buildings/document_detail.html', {'document': document})
+    Documento = get_object_or_404(Documento, pk=pk)
+    return render(request, 'heritage_buildings/document_detail.html', {'Documento': Documento})
 
 @login_required
 def document_create(request):
     if request.method == 'POST':
         form = documentForm(request.POST, request.FILES)
         if form.is_valid():
-            document = form.save()
-            return redirect('document_detail', pk=document.pk)
+            Documento = form.save()
+            return redirect('document_detail', pk=Documento.pk)
     else:
         form = documentForm()
     return render(request, 'heritage_buildings/document_form.html', {'form': form})
 
 @login_required
 def document_edit(request, pk):
-    document = get_object_or_404(document, pk=pk)
+    Documento = get_object_or_404(Documento, pk=pk)
     if request.method == 'POST':
-        form = documentForm(request.POST, request.FILES, instance=document)
+        form = documentForm(request.POST, request.FILES, instance=Documento)
         if form.is_valid():
-            document = form.save()
-            return redirect('document_detail', pk=document.pk)
+            Documento = form.save()
+            return redirect('document_detail', pk=Documento.pk)
     else:
-        form = documentForm(instance=document)
+        form = documentForm(instance=Documento)
     return render(request, 'heritage_buildings/document_form.html', {'form': form})
 
 @login_required
 def document_delete(request, pk):
-    document = get_object_or_404(document, pk=pk)
+    Documento = get_object_or_404(Documento, pk=pk)
     if request.method == 'POST':
-        document.delete()
+        Documento.delete()
         return redirect('document_list')
-    return render(request, 'heritage_buildings/document_confirm_delete.html', {'document': document})
+    return render(request, 'heritage_buildings/document_confirm_delete.html', {'Documento': Documento})

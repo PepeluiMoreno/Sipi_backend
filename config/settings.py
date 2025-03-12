@@ -22,14 +22,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.gis',
     'crispy_forms',  # django-crispy-forms
     'crispy_tailwind',  # crispy-tailwind
+    'apps.custom_commands', 
     'apps.heritage_buildings',  # App heritage_buildings
-    'rbac',  # App Roll Based Access Control
+   
 
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -52,7 +55,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'config.context_processors.menu_apps',
+               # 'config.context_processors.menu_apps',
             ],
         },
     },
@@ -63,7 +66,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        #'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': os.getenv('POSTGRES_DB', 'mydatabase'),
         'USER': os.getenv('POSTGRES_USER', 'myuser'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'mypassword'),
@@ -95,12 +99,17 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Carpeta global de archivos estáticos
-    os.path.join(BASE_DIR, 'apps/heritage_buildings/static'),
-    os.path.join(BASE_DIR, 'rbac/static'),
-]
+STATIC_URL = 'staticfiles/'
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+#STATICFILES_DIRS = [
+#    #os.path.join(BASE_DIR, 'static'),  # Carpeta global de archivos estáticos
+#    os.path.join(BASE_DIR, 'apps/heritage_buildings/static'),
+#
+
+STATIC_ROOT= BASE_DIR /"staticfiles"
+
+
+
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

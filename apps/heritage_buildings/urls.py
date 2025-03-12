@@ -2,6 +2,11 @@
 
 from django.urls import path
 from . import views
+from django.contrib import admin
+
+admin.site.site_header = 'Coordinadora Recuperando '                                       # default: "Django Administration"
+admin.site.index_title = 'Registro de Bienes Inmatriculados'                 # default: "Site administration"
+admin.site.site_title = 'SI2V' # default: "Django site admin"
 
 urlpatterns = [
     path('', views.building_list, name='building_list'),

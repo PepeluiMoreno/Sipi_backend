@@ -11,6 +11,16 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Instala dependencias del sistema para GeoDjango
+RUN apt-get update && apt-get install -y \
+binutils \
+gdal-bin \
+libgdal-dev \
+libproj-dev \
+&& rm -rf /var/lib/apt/lists/*
+
+
+
 # Copiar el archivo de requisitos
 COPY requirements.txt /code/
 

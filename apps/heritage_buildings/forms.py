@@ -1,13 +1,51 @@
 # heritage_defense/apps/heritage_buildings/forms.py
 
 from django import forms
-from .models import building, document
+from .models import Edificio, Documento
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Row, Column, Submit
 
+class EdificioForm(forms.ModelForm):
+    coordenadas_texto = forms.CharField(
+        label="Coordenadas (lat, lon)",
+        required=False,
+        help_text="Ingrese las coordenadas en formato 'latitud, longitud'. Ejemplo: 40.4168, -3.7038"
+    )
+
+    class Meta:
+        model = Edificio
+        fields = '__all__'  # Incluye todos los campos
+        exclude = ['coordenadas']  # Excluye explícitamente el campo 'coordenadas'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si hay coordenadas en la instancia, mostrarlas como texto
+        if self.instance and self.instance.coordenadas:
+            self.initial['coordenadas_texto'] = f"{self.instance.coordenadas.y}, {self.instance.coordenadas.x}"
+
+    def clean_coordenadas_texto(self):
+        """Convierte el texto de coordenadas en un objeto Point."""
+        coordenadas_texto = self.cleaned_data.get('coordenadas_texto')
+        if coordenadas_texto:
+            try:
+                lat, lon = map(float, coordenadas_texto.split(','))
+                return Point(lon, lat)  # Point espera (longitud, latitud)
+            except (ValueError, AttributeError):
+                raise forms.ValidationError("Formato inválido. Use 'latitud, longitud'.")
+        return None
+
+    def save(self, commit=True):
+        """Guarda las coordenadas como un objeto Point."""
+        instance = super().save(commit=False)
+        coordenadas = self.clean_coordenadas_texto()  # Obtener el Point validado
+        instance.coordenadas = coordenadas
+        if commit:
+            instance.save()
+        return instance
+
 class BuildingForm(forms.ModelForm):
     class Meta:
-        model = building
+        model = Edificio
         exclude = ['grabado_por', 'fecha_grabacion', 'modificado_por', 'fecha_modificacion']
         widgets = {
             'fecha_venta': forms.DateInput(attrs={'type': 'date', 'class': 'form-input mt-1 block w-full'}),
@@ -52,7 +90,7 @@ class BuildingForm(forms.ModelForm):
 
 class DocumentForm(forms.ModelForm):
     class Meta:
-        model = document
+        model = Documento
         exclude = ['grabado_por', 'fecha_grabacion', 'modificado_por', 'fecha_modificacion']
         widgets = {
             'fecha': forms.DateInput(attrs={'type': 'date', 'class': 'form-input mt-1 block w-full'}),

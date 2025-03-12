@@ -1,13 +1,25 @@
 services:
   db:
-    image: postgres:13
+    image: postgis/postgis:13-3.3  # Usa una imagen con PostGIS preinstalado
     container_name: db
     env_file:
       - .env
     ports:
       - "5432:5432"
+    
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db_scripts/init.sql:/docker-entrypoint-initdb.d/init.sql  
     networks:
       - internal_network
+     
 
   web:
     build: .
@@ -15,16 +27,19 @@ services:
     env_file:
       - .env
     command: >
-      sh -c "python manage.py migrate &&
+      sh -c "python manage.py collectstatic --noinput &&
+             python manage.py migrate &&
              python manage.py createsuperuser_custom &&
-             gunicorn config.wsgi:application --bind 0.0.0.0:8000"
-          
+             python manage.py load_territorios &&
+             python manage.py load_data &&
+             command: gunicorn tu_proyecto.wsgi:application --bind 0.0.0.0:8000 --timeout 60
     volumes:
       - .:/code
     ports:
       - "8000:8000"
     depends_on:
-      - db
+        db:
+          condition: service_healthy 
     networks:
       - internal_network
       - external_network
@@ -36,3 +51,6 @@ networks:
   external_network:
     name: external_network
     driver : bridge
+
+volumes:
+  postgres_data:

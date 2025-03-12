@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='building',
+            name='edificio',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('municipio', models.CharField(max_length=100)),
