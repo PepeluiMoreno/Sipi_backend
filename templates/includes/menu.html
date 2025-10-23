@@ -1,5 +1,0 @@
-{% for app in menu_apps %}
-<a hx-get="{% url app.name|add:'_list' %}" hx-target="#content" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700">
-    {{ app.name|title }}
-</a>
-{% endfor %}
