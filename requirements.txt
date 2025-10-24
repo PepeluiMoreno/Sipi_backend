@@ -1,6 +1,9 @@
-fastapi==0.115.5
-uvicorn[standard]==0.30.6
-SQLAlchemy==2.0.36
-psycopg[binary]==3.2.3
-geoalchemy2==0.15.2
-python-dotenv==1.0.1
+fastapi>=0.115.0
+strawberry-graphql>=0.211.0
+uvicorn>=0.30.0
+gunicorn>=22.0.0
+sqlalchemy>=2.0.30
+alembic>=1.13.2
+psycopg[binary]>=3.2.0
+python-dotenv>=1.0.1
+pydantic>=2.7.0

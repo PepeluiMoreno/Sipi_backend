@@ -1,10 +1,4 @@
-# Sipi Backend (SQLAlchemy + FastAPI)
+# SIPI Backend — Strawberry GraphQL + FastAPI + SQLAlchemy (Neon PostGIS) on Render + CI/CD (GitHub Actions)
 
-Minimal skeleton to run on a free-tier with Docker + PostGIS.
-
-## Quickstart
-1) Create `.env` from `.env.example` and set values.
-2) `docker compose up -d --build`
-3) Visit `http://localhost:8000/healthz`
-
-> Only core pieces included. Alembic/GraphQL/ETL can be added later.
+Listo para Render + Neon + CI/CD.
+Ver `render.yaml`, `.github/workflows/deploy.yml`, y `.env.example`.
