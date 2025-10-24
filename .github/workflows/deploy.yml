@@ -1,7 +1,8 @@
-name: CI & Deploy (Render)
+name: CI, Migrate & Deploy (Render + Neon)
+
 on:
   push:
-    branches: [ 'main' ]
+    branches: [ "main" ]
   workflow_dispatch:
 
 concurrency:
@@ -10,37 +11,77 @@ concurrency:
 
 jobs:
   build-and-test:
+    name: Build & Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
-      - name: Install deps
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
       - name: Run tests (if any)
         run: |
-          if [ -f 'pytest.ini' ] || [ -d 'tests' ]; then
+          if [ -f "pytest.ini" ] || [ -d "tests" ]; then
             pip install pytest
             pytest -q
           else
-            echo 'No tests found. Skipping.'
+            echo "No tests found. Skipping."
           fi
 
-  deploy:
+  migrate:
+    name: Alembic Migrations (Neon)
     needs: build-and-test
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: ${{ github.ref == 'refs/heads/main' }}
+    env:
+      # Alembic usa esta URL (directa, NO pooler) para aplicar migraciones
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
     steps:
-      - name: Trigger Render deploy via Deploy Hook
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Alembic & deps
         run: |
-          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
-            echo '❌ Missing secret RENDER_DEPLOY_HOOK_URL'; exit 1
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # (requirements.txt ya incluye alembic y psycopg[binary])
+
+      - name: Run Alembic upgrade
+        run: |
+          alembic upgrade head
+
+  deploy:
+    name: Trigger Render Deploy
+    needs: migrate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Trigger Render via Deploy Hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "❌ Missing secret RENDER_DEPLOY_HOOK_URL"; exit 1
           fi
-          curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
-          echo '✅ Deploy triggered'
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+          echo "✅ Deploy triggered on Render"
+
