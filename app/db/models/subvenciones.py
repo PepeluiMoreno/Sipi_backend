@@ -1,23 +1,20 @@
-from __future__ import annotations
-from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import String, Text, Float, ForeignKey
 from .base import Base, UUIDPKMixin, AuditMixin
 
 class ActuacionSubvencion(UUIDPKMixin, AuditMixin, Base):
     __tablename__ = "actuaciones_subvenciones"
-    actuacion_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("actuaciones.id"))
-    codigo_concesion: Mapped[str]
-    importe_aplicado: Mapped[Optional[float]]
-    porcentaje_financiacion: Mapped[Optional[float]]
-    fecha_aplicacion: Mapped[Optional[str]]
-    justificacion_gasto: Mapped[Optional[str]]
-    observaciones: Mapped[Optional[str]]
+    actuacion_id: Mapped[str] = mapped_column(String(36), ForeignKey("actuaciones.id"))
+    codigo_concesion: Mapped[str] = mapped_column(String(100))
+    importe_aplicado: Mapped[float | None] = mapped_column(Float, nullable=True)
+    porcentaje_financiacion: Mapped[float | None] = mapped_column(Float, nullable=True)
+    fecha_aplicacion: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    justificacion_gasto: Mapped[str | None] = mapped_column(Text, nullable=True)
+    observaciones: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 class SubvencionAdministracion(UUIDPKMixin, AuditMixin, Base):
     __tablename__ = "subvenciones_administraciones"
-    subvencion_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("actuaciones_subvenciones.id"))
-    administracion_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("administraciones.id"))
-    importe_aportado: Mapped[Optional[float]]
-    porcentaje_participacion: Mapped[Optional[float]]
+    subvencion_id: Mapped[str] = mapped_column(String(36), ForeignKey("actuaciones_subvenciones.id"))
+    administracion_id: Mapped[str] = mapped_column(String(36), ForeignKey("administraciones.id"))
+    importe_aportado: Mapped[float | None] = mapped_column(Float, nullable=True)
+    porcentaje_participacion: Mapped[float | None] = mapped_column(Float, nullable=True)

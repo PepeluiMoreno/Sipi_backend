@@ -1,27 +1,20 @@
-from __future__ import annotations
-from typing import Optional
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import String, Text, DateTime, Boolean, ForeignKey
 from .base import Base, UUIDPKMixin, AuditMixin
 
 class FiguraProteccion(UUIDPKMixin, AuditMixin, Base):
     __tablename__ = "figuras_proteccion"
-    __table_args__ = (
-        UniqueConstraint("nombre", name="uq_figura_proteccion_nombre"),
-        UniqueConstraint("nombre_normalizado", name="uq_figura_proteccion_normalizado"),
-    )
-    nombre: Mapped[str]
-    nombre_normalizado: Mapped[str]
-    descripcion: Mapped[Optional[str]]
-    ambito: Mapped[Optional[str]]
-    wikidata_qid: Mapped[Optional[str]] = mapped_column(nullable=True, unique=True)
+    nombre: Mapped[str] = mapped_column(String(150), unique=True)
+    nombre_normalizado: Mapped[str | None] = mapped_column(String(150), nullable=True, index=True)
+    descripcion: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ambito: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    wikidata_qid: Mapped[str | None] = mapped_column(String(32), nullable=True, unique=True)
 
 class InmuebleFiguraProteccion(UUIDPKMixin, AuditMixin, Base):
     __tablename__ = "inmuebles_figuras_proteccion"
-    inmueble_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("inmuebles.id"))
-    figura_proteccion_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("figuras_proteccion.id"))
-    administracion_id: Mapped[Optional[str]] = mapped_column(UUID(as_uuid=False), ForeignKey("administraciones.id"), nullable=True)
-    bic_id: Mapped[Optional[str]] = mapped_column(nullable=True)
-    norma: Mapped[Optional[str]] = mapped_column(nullable=True)
-    fecha_declaracion: Mapped[Optional[str]] = mapped_column(nullable=True)
+    inmueble_id: Mapped[str] = mapped_column(String(36), ForeignKey("inmuebles.id"))
+    figura_proteccion_id: Mapped[str] = mapped_column(String(36), ForeignKey("figuras_proteccion.id"))
+    administracion_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("administraciones.id"), nullable=True)
+    bic_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    norma: Mapped[str | None] = mapped_column(Text, nullable=True)
+    fecha_declaracion: Mapped[DateTime | None] = mapped_column(DateTime, nullable=True)

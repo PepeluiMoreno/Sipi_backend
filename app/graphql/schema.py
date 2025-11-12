@@ -1,49 +1,46 @@
 import strawberry
-from typing import List, Optional
-from .types import (
-    InmuebleType, ComunidadAutonomaType, ProvinciaType, LocalidadType, DiocesisType,
-    FiguraProteccionType, InmuebleFiguraProteccionType, DocumentoType
-)
-from .filters import InmuebleFilter, InmuebleOrderBy
-from .common import PageInfo
-from .inputs import InmuebleInput, InmuebleFiguraProteccionInput, InmuebleUpsertNaturalKey
+from typing import Optional, List
+from strawberry.types import Info
+from .types import InmuebleType, LocalidadType, ProvinciaType, DiocesisType
 from . import resolvers
-from .mutations import (
-    create_inmueble, delete_inmueble, upsert_inmueble_figura,
-    upsert_inmueble_by_natural_key, batch_upsert_inmuebles,
-    MutationResult, BatchResult
-)
-
-@strawberry.type
-class InmuebleConnection:
-    items: List[InmuebleType]
-    page_info: PageInfo
 
 @strawberry.type
 class Query:
-    ping: str = "pong"
-    inmuebles: InmuebleConnection = strawberry.field(resolver=lambda *args, **kwargs: None)
-    inmueble: Optional[InmuebleType] = strawberry.field(resolver=resolvers.get_inmueble)
-    comunidades: List[ComunidadAutonomaType] = strawberry.field(resolver=resolvers.list_comunidades)
-    provincias: List[ProvinciaType] = strawberry.field(resolver=resolvers.list_provincias)
-    localidades: List[LocalidadType] = strawberry.field(resolver=resolvers.list_localidades)
-    diocesis: List[DiocesisType] = strawberry.field(resolver=resolvers.list_diocesis)
-    figuras_proteccion: List[FiguraProteccionType] = strawberry.field(resolver=resolvers.list_figuras)
-    inmueble_figuras: List[InmuebleFiguraProteccionType] = strawberry.field(resolver=resolvers.list_inmueble_figuras)
-    inmueble_documentos: List[DocumentoType] = strawberry.field(resolver=resolvers.list_inmueble_documentos)
+    @strawberry.field
+    def ping(self, info: Info) -> str:
+        return "ok"
 
-    def resolve_inmuebles(self, info, f: Optional[InmuebleFilter] = None,
-                          order_by: Optional[InmuebleOrderBy] = None,
-                          limit: int = 50, offset: int = 0) -> "InmuebleConnection":
-        items, pi = resolvers.list_inmuebles(f=f, order_by=order_by, limit=limit, offset=offset)
-        return InmuebleConnection(items=items, page_info=pi)
+    @strawberry.field
+    def inmueble(self, info: Info, id: str) -> Optional[InmuebleType]:
+        obj = resolvers.resolve_inmueble(info, id)
+        if not obj:
+            return None
+        return InmuebleType(
+            id=obj.id, nombre=obj.nombre, descripcion=obj.descripcion,
+            direccion=obj.direccion, latitud=obj.latitud, longitud=obj.longitud
+        )
 
-@strawberry.type
-class Mutation:
-    create_inmueble: MutationResult = strawberry.field(resolver=create_inmueble)
-    upsert_inmueble_by_natural_key: MutationResult = strawberry.field(resolver=upsert_inmueble_by_natural_key)
-    batch_upsert_inmuebles: BatchResult = strawberry.field(resolver=batch_upsert_inmuebles)
-    delete_inmueble: MutationResult = strawberry.field(resolver=delete_inmueble)
-    upsert_inmueble_figura: MutationResult = strawberry.field(resolver=upsert_inmueble_figura)
+    @strawberry.field
+    def inmuebles(self, info: Info, limit: int = 100) -> List[InmuebleType]:
+        rows = resolvers.resolve_inmuebles(info, limit=limit)
+        return [InmuebleType(
+            id=o.id, nombre=o.nombre, descripcion=o.descripcion,
+            direccion=o.direccion, latitud=o.latitud, longitud=o.longitud
+        ) for o in rows]
 
-schema = strawberry.Schema(query=Query, mutation=Mutation)
+    @strawberry.field
+    def localidades(self, info: Info) -> List[LocalidadType]:
+        rows = resolvers.resolve_localidades(info)
+        return [LocalidadType(id=o.id, nombre=o.nombre) for o in rows]
+
+    @strawberry.field
+    def provincias(self, info: Info) -> List[ProvinciaType]:
+        rows = resolvers.resolve_provincias(info)
+        return [ProvinciaType(id=o.id, nombre=o.nombre) for o in rows]
+
+    @strawberry.field
+    def diocesis(self, info: Info) -> List[DiocesisType]:
+        rows = resolvers.resolve_diocesis(info)
+        return [DiocesisType(id=o.id, nombre=o.nombre, wikidata_qid=o.wikidata_qid) for o in rows]
+
+schema = strawberry.Schema(Query)

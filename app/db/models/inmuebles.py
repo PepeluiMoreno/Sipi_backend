@@ -1,25 +1,27 @@
-from __future__ import annotations
-from typing import Optional
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import String, Text, Float, Boolean, ForeignKey
 from .base import Base, UUIDPKMixin, AuditMixin
 
 class Inmueble(UUIDPKMixin, AuditMixin, Base):
     __tablename__ = "inmuebles"
-    nombre: Mapped[str]
-    descripcion: Mapped[Optional[str]]
-    direccion: Mapped[str]
-    latitud: Mapped[Optional[float]]
-    longitud: Mapped[Optional[float]]
-    wikidata_qid: Mapped[Optional[str]] = mapped_column(nullable=True, unique=True)
-    provincia_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("provincias.id"))
-    localidad_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("localidades.id"))
-    diocesis_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("diocesis.id"))
-    tipo_inmueble_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("tipos_inmueble.id"))
-    estado_conservacion_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("estados_conservacion.id"))
-    estado_tratamiento_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("estados_tratamiento.id"))
-    es_bic: Mapped[bool] = mapped_column(default=False)
-    es_ruina: Mapped[bool] = mapped_column(default=False)
-    esta_inmatriculado: Mapped[bool] = mapped_column(default=False)
-    id_inmatriculacion: Mapped[Optional[str]] = mapped_column(UUID(as_uuid=False), ForeignKey("transmisiones.id"), nullable=True)
+    nombre: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    descripcion: Mapped[str | None] = mapped_column(Text, nullable=True)
+    direccion: Mapped[str | None] = mapped_column(Text, nullable=True)
+    latitud: Mapped[float | None] = mapped_column(Float, nullable=True)
+    longitud: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    provincia_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("provincias.id"), nullable=True)
+    localidad_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("localidades.id"), nullable=True)
+    diocesis_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("diocesis.id"), nullable=True)
+
+    tipo_inmueble_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("tipos_inmueble.id"), nullable=True)
+    estado_conservacion_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("estados_conservacion.id"), nullable=True)
+    estado_tratamiento_id: Mapped[str | None] = mapped_column(String(36), ForeignKey("estados_tratamiento.id"), nullable=True)
+
+    es_bic: Mapped[bool] = mapped_column(Boolean, default=False)
+    es_ruina: Mapped[bool] = mapped_column(Boolean, default=False)
+    esta_inmatriculado: Mapped[bool] = mapped_column(Boolean, default=False)
+    id_inmatriculacion: Mapped[str | None] = mapped_column(String(36), ForeignKey("transmisiones.id"), nullable=True)
+
+    transmisiones = relationship("Transmision", back_populates="inmueble")
+    actuaciones = relationship("Actuacion", back_populates="inmueble")
