@@ -1,5 +1,6 @@
 from typing import Optional
 from sqlalchemy import select, func
+from app.db.session  import get_db
 from app.db.models import (
     Inmueble, ComunidadAutonoma, Provincia, Localidad, Diocesis, FiguraProteccion,
     InmuebleFiguraProteccion, Documento, InmuebleDocumento
@@ -10,7 +11,7 @@ from .types import (
 )
 from .filters import InmuebleFilter, InmuebleOrderBy
 from .common import page_info
-from .db import get_db
+
 
 def to_dict(row):
     return {c.key: getattr(row, c.key) for c in row.__table__.columns}

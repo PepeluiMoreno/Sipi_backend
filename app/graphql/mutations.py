@@ -2,7 +2,7 @@ import strawberry
 from typing import Optional, List
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select, and_
-from app.db.session import SessionLocal
+from app.db import SessionLocal
 from app.db.models import Inmueble, InmuebleFiguraProteccion
 from .inputs import InmuebleInput, InmuebleFiguraProteccionInput, InmuebleUpsertNaturalKey
 from .types import InmuebleType, InmuebleFiguraProteccionType

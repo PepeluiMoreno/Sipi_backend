@@ -9,7 +9,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      test: ["CMD-SHELL", "pg_isready -h db -p 5432 -q || exit 1"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -55,6 +55,22 @@ services:
       - ./ETL/workflows:/data/workflows:ro
       - ./ETL/data:/data/data
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: sipi-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "8080:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["pgadmin"]
+
 volumes:
   pgdata:
   n8n_data:
+  pgadmin_data:

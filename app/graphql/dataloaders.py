@@ -1,7 +1,7 @@
 from aiodataloader import DataLoader
 from sqlalchemy import select
 from typing import Iterable, Any
-from app.db.session import SessionLocal
+from app.db import SessionLocal
 
 class ByIdLoader(DataLoader):
     def __init__(self, model):

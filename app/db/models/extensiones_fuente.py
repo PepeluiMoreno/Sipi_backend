@@ -1,33 +1,44 @@
 from __future__ import annotations
-from typing import Optional, Dict, Any
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+
+from sqlalchemy.dialects.postgresql import JSONB
+from .base import Base, UUIDPKMixin, AuditMixin
+
+from sqlalchemy import Column, String, DateTime, Integer, ForeignKey
+from sqlalchemy.orm import relationship
+
+from sqlalchemy.ext.mutable import MutableDict
+
 from .base import Base, UUIDPKMixin, AuditMixin
 
 class InmuebleOSMExt(UUIDPKMixin, AuditMixin, Base):
     __tablename__ = "inmuebles_osm_ext"
-    inmueble_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("inmuebles.id"), unique=True, nullable=True)
-    osm_id: Mapped[Optional[int]]
-    osm_tipo: Mapped[Optional[str]]
-    tags: Mapped[Optional[dict]]
-    source_url: Mapped[Optional[str]]
-    etag: Mapped[Optional[str]]
-    hash_contenido: Mapped[Optional[str]]
-    fecha_extraccion: Mapped[Optional[str]]
-    fecha_fuente: Mapped[Optional[str]]
+
+    # 1:1 con inmueble
+    inmueble_id = Column(String(36), ForeignKey("inmuebles.id"), nullable=False, unique=True)
+
+    osm_id = Column(String(50), nullable=True)       # id numérico en texto
+    osm_type = Column(String(10), nullable=True)     # node/way/relation
+    version = Column(Integer, nullable=True)
+    source_updated_at = Column(DateTime, nullable=True)
+
+    # JSONB mutables (sin anotaciones de tipo Python)
+    tags = Column(MutableDict.as_mutable(JSONB), nullable=True)
+    raw = Column(MutableDict.as_mutable(JSONB), nullable=True)
+
+    inmueble = relationship("Inmueble", backref="osm_ext", uselist=False)
 
 class InmuebleWDExt(UUIDPKMixin, AuditMixin, Base):
     __tablename__ = "inmuebles_wd_ext"
-    inmueble_id: Mapped[str] = mapped_column(UUID(as_uuid=False), ForeignKey("inmuebles.id"), unique=True, nullable=True)
-    wikidata_qid: Mapped[Optional[str]]
-    label_es: Mapped[Optional[str]]
-    descripcion_es: Mapped[Optional[str]]
-    claims: Mapped[Optional[dict]]
-    image_url: Mapped[Optional[str]]
-    inception: Mapped[Optional[str]]
-    source_url: Mapped[Optional[str]]
-    etag: Mapped[Optional[str]]
-    hash_contenido: Mapped[Optional[str]]
-    fecha_extraccion: Mapped[Optional[str]]
-    fecha_fuente: Mapped[Optional[str]]
+
+    # 1:1 con inmueble
+    inmueble_id = Column(String(36), ForeignKey("inmuebles.id"), nullable=False, unique=True)
+
+    wikidata_qid = Column(String(32), nullable=True, unique=True)
+    commons_category = Column(String(255), nullable=True)
+    source_updated_at = Column(DateTime, nullable=True)
+
+    claims = Column(MutableDict.as_mutable(JSONB), nullable=True)
+    sitelinks = Column(MutableDict.as_mutable(JSONB), nullable=True)
+    raw = Column(MutableDict.as_mutable(JSONB), nullable=True)
+
+    inmueble = relationship("Inmueble", backref="wd_ext", uselist=False)

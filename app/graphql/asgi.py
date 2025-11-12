@@ -9,4 +9,4 @@ def get_context():
 app = GraphQL(schema, graphiql=True, context_getter=lambda request: get_context())
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=os.getenv("GRAPHQL_HOST","0.0.0.0"), port=int(os.getenv("GRAPHQL_PORT","8000")))
+    uvicorn.run(app, host=os.getenv("GRAPHQL_HOST","0.0.0.0"), port=int(os.getenv("GRAPHQL_PORT","8040")))
