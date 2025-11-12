@@ -1,0 +1,11 @@
+{
+  "name": "division_civil_n8n.json",
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "timezone": "Europe/Madrid"
+  },
+  "meta": {
+    "description": "Descarga INE y ejecuta extract→transform→load"
+  }
+}

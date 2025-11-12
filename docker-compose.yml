@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:16
+    container_name: sipi-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5432:5432"
+
+  graphql:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sipi-graphql
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      GRAPHQL_HOST: ${GRAPHQL_HOST}
+      GRAPHQL_PORT: ${GRAPHQL_PORT}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8040:${GRAPHQL_PORT}"
+    command: ["/bin/sh", "/entrypoint.sh"]
+
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: sipi-n8n
+    restart: unless-stopped
+    profiles: ["n8n"]
+    environment:
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PORT=${N8N_PORT}
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
+      - WEBHOOK_URL=${WEBHOOK_URL}
+      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE}
+      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER}
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - TZ=${GENERIC_TIMEZONE}
+    ports:
+      - "${N8N_PORT}:${N8N_PORT}"
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./ETL/workflows:/data/workflows:ro
+      - ./ETL/data:/data/data
+
+volumes:
+  pgdata:
+  n8n_data:

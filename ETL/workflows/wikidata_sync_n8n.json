@@ -1,0 +1,11 @@
+{
+  "name": "wikidata_sync_n8n.json",
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "timezone": "Europe/Madrid"
+  },
+  "meta": {
+    "description": "SPARQL WD → transform → load WD ext"
+  }
+}

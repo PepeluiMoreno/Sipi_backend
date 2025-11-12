@@ -1,0 +1,11 @@
+{
+  "name": "division_religiosa_n8n.json",
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "timezone": "Europe/Madrid"
+  },
+  "meta": {
+    "description": "SPARQL WD diócesis → transform → load"
+  }
+}

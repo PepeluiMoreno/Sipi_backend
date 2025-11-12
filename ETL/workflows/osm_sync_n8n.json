@@ -1,0 +1,11 @@
+{
+  "name": "osm_sync_n8n.json",
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "timezone": "Europe/Madrid"
+  },
+  "meta": {
+    "description": "Overpass → transform → load OSM ext"
+  }
+}

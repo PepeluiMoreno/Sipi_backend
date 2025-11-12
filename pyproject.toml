@@ -1,0 +1,15 @@
+[project]
+name = "sipi"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+  "SQLAlchemy>=2.0",
+  "psycopg2-binary>=2.9",
+  "alembic>=1.13",
+  "strawberry-graphql>=0.211.1",
+  "uvicorn>=0.30",
+  "pandas>=2.2",
+  "requests>=2.32",
+  "python-dotenv>=1.0",
+  "unidecode>=1.3"
+]

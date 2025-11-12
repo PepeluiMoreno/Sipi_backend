@@ -1,0 +1,1 @@
+print('transform wd diocesis')

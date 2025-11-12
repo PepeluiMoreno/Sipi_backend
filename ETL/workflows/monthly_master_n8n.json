@@ -1,0 +1,11 @@
+{
+  "name": "monthly_master_n8n.json",
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "timezone": "Europe/Madrid"
+  },
+  "meta": {
+    "description": "Orquesta ejecución mensual"
+  }
+}
