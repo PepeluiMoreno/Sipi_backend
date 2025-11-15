@@ -12,6 +12,17 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+
+# Obtener la URL de la base de datos de la variable de entorno
+
+database_url = os.getenv("DATABASE_URL")
+if not database_url:
+    # Si no está en variable de entorno, intentar desde alembic.ini
+    database_url = config.get_main_option("sqlalchemy.url")
+    if not database_url:
+        raise Exception("❌ No se encontró DATABASE_URL en variables de entorno")
+
+
 # Importación crítica - si falla, mostrar error real y salir
 try:
     from app.db.session import engine

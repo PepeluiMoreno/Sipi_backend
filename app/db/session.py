@@ -1,10 +1,13 @@
 # session.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Configuración de la base de datos - actualiza con tu cadena de conexión
-SQLALCHEMY_DATABASE_URL = "postgresql://usuario:password@localhost/nombre_bd"
-
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

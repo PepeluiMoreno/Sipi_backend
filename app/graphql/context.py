@@ -1,18 +1,11 @@
 # app/graphql/context.py
-
-from app.db.session import SessionLocal
-from .dataloaders import build_dataloaders
-
-from app.db.session import SessionLocal
+from app.db.session_async import get_db
 
 async def get_context():
-    db = SessionLocal()
-    try:
-        return {"db": db}
-    except Exception:
-        db.close()
-        raise
+    """
+    Contexto asíncrono para GraphQL
+    """
+    async for db_session in get_db():
+        return {"db": db_session}
 
 context_getter = get_context
-
-

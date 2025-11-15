@@ -15,6 +15,10 @@ from .documentos import Documento, InmuebleDocumento, ActuacionDocumento, Transm
 from .actuaciones import Actuacion, ActuacionTecnicos
 from .transmisiones import Transmision, Inmatriculacion, TransmisionAnunciantes
 from .inmuebles import Inmueble, InmuebleOSMExt, InmuebleWDExt
+from .historiografia import FuenteHistoriografica, CitaHistoriografica
+from .proteccion import InmuebleFiguraProteccion
+from .subvenciones import ActuacionSubvencion, SubvencionAdministracion
+from .users import Usuario, Rol, usuario_rol
 
 __all__ = [
     'Base', 'UUIDPKMixin', 'AuditMixin',
@@ -28,5 +32,9 @@ __all__ = [
     'Documento', 'InmuebleDocumento', 'ActuacionDocumento', 'TransmisionDocumento',
     'Actuacion', 'ActuacionTecnicos',
     'Transmision', 'Inmatriculacion', 'TransmisionAnunciantes',
-    'Inmueble', 'InmuebleOSMExt', 'InmuebleWDExt'
+    'Inmueble', 'InmuebleOSMExt', 'InmuebleWDExt',
+    'FuenteHistoriografica', 'CitaHistoriografica',
+    'InmuebleFiguraProteccion',
+    'ActuacionSubvencion', 'SubvencionAdministracion',
+    'Usuario', 'Rol', 'usuario_rol'
 ]
