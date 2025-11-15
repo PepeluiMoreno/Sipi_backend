@@ -10,11 +10,11 @@
 │   │   │   ├── agentes.py
 │   │   │   ├── base.py
 │   │   │   ├── catalogos.py
-│   │   │   ├── division_civil.py
+│   │   │   ├── geografia.py
 │   │   │   ├── division_religiosa.py
 │   │   │   ├── documentos.py
 │   │   │   ├── extensiones_fuente.py
-│   │   │   ├── historiales.py
+│   │   │   ├── transmisiones.py
 │   │   │   ├── historiografia.py
 │   │   │   ├── __init__.py
 │   │   │   ├── inmuebles.py
@@ -38,28 +38,28 @@
 ├── Dockerfile
 ├── entrypoint.sh
 ├── ETL
-│   ├── division_civil
+│   ├── geografia
 │   │   └── data
 │   │       └── ccaa.csv
 │   ├── extract
-│   │   ├── division_civil.py
+│   │   ├── geografia.py
 │   │   ├── division_religiosa.py
 │   │   ├── osm_inmuebles.py
 │   │   └── wikidata_inmuebles.py
 │   ├── load
-│   │   ├── division_civil.py
+│   │   ├── geografia.py
 │   │   ├── division_religiosa.py
 │   │   ├── figuras_proteccion.py
 │   │   └── inmuebles_ext.py
 │   ├── shared
 │   │   └── logging_utils.py
 │   ├── transform
-│   │   ├── division_civil.py
+│   │   ├── geografia.py
 │   │   ├── division_religiosa.py
 │   │   ├── osm_inmuebles.py
 │   │   └── wikidata_inmuebles.py
 │   └── workflows
-│       ├── division_civil_n8n.json
+│       ├── geografia_n8n.json
 │       ├── division_religiosa_n8n.json
 │       ├── monthly_master_n8n.json
 │       ├── osm_sync_n8n.json

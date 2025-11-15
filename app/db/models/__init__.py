@@ -1,19 +1,32 @@
+# models/__init__.py
 from .base import Base, UUIDPKMixin, AuditMixin
-from .users import Usuario, Rol, usuario_rol
-from .division_civil import ComunidadAutonoma, Provincia, Localidad
-from .division_religiosa import Diocesis, DiocesisTitular
-from .catalogos import (
-    TipoInmueble, EstadoConservacion, EstadoTratamiento,
-    TipoDocumento, TipoMimeDocumento, TipoAdquiriente,
-    TipoTransmision, TipoCertificacionPropiedad, RolProfesional,
-    ColegioProfesional, Administracion
+from .agentes import (
+    Adquiriente, Administracion, AdministracionTitular, AgenciaInmobiliaria, AgenciaInmobiliariaTitular,
+    ColegioProfesional, Diocesis, DiocesisTitular, Notaria, NotariaTitular,
+    Tecnico, RegistroPropiedad, RegistroTitular, Transmitente
 )
-from .proteccion import FiguraProteccion, InmuebleFiguraProteccion
+from .catalogos import (
+    EstadoConservacion, EstadoTratamiento, FigurasProteccion, RolTecnico,
+    TipoCertificacionPropiedad, TipoDocumento, TipoInmueble, TipoMimeDocumento,
+    TipoPersona, TipoTransmision
+)
+from .geografia import ComunidadAutonoma, Provincia, Localidad
 from .documentos import Documento, InmuebleDocumento, ActuacionDocumento, TransmisionDocumento
-from .inmuebles import Inmueble
-from .agentes import Profesional, Colegiacion, RegistroPropiedad, Notaria, Notario, Adquiriente
-from .historiales import Transmision, Actuacion, ActuacionParticipacion
-from .historiografia import FuenteHistoriografica, CitaHistoriografica
-from .subvenciones import ActuacionSubvencion, SubvencionAdministracion
-from .extensiones_fuente import InmuebleOSMExt, InmuebleWDExt
-__all__ = [name for name in globals().keys() if not name.startswith("_")]
+from .actuaciones import Actuacion, ActuacionTecnicos
+from .transmisiones import Transmision, Inmatriculacion, TransmisionAnunciantes
+from .inmuebles import Inmueble, InmuebleOSMExt, InmuebleWDExt
+
+__all__ = [
+    'Base', 'UUIDPKMixin', 'AuditMixin',
+    'Adquiriente', 'Administracion', 'AdministracionTitular', 'AgenciaInmobiliaria', 'AgenciaInmobiliariaTitular',
+    'ColegioProfesional', 'Diocesis', 'DiocesisTitular', 'Notaria', 'NotariaTitular',
+    'Tecnico', 'RegistroPropiedad', 'RegistroTitular', 'Transmitente',
+    'EstadoConservacion', 'EstadoTratamiento', 'FigurasProteccion', 'RolTecnico',
+    'TipoCertificacionPropiedad', 'TipoDocumento', 'TipoInmueble', 'TipoMimeDocumento',
+    'TipoPersona', 'TipoTransmision',
+    'ComunidadAutonoma', 'Provincia', 'Localidad',
+    'Documento', 'InmuebleDocumento', 'ActuacionDocumento', 'TransmisionDocumento',
+    'Actuacion', 'ActuacionTecnicos',
+    'Transmision', 'Inmatriculacion', 'TransmisionAnunciantes',
+    'Inmueble', 'InmuebleOSMExt', 'InmuebleWDExt'
+]

@@ -19,11 +19,23 @@ class Usuario(UUIDPKMixin, AuditMixin, Base):
     apellidos: Mapped[str] = mapped_column(String(200))
     activo: Mapped[bool] = mapped_column(Boolean, default=True)
     email_verificado: Mapped[bool] = mapped_column(Boolean, default=False)
-    roles = relationship("Rol", secondary=usuario_rol, back_populates="usuarios")
+    roles = relationship(
+        "Rol",
+        secondary=usuario_rol,
+        primaryjoin="Usuario.id == usuario_rol.c.usuario_id",
+        secondaryjoin="usuario_rol.c.rol_id == Rol.id",
+        back_populates="usuarios"
+    )
 
 class Rol(UUIDPKMixin, AuditMixin, Base):
     __tablename__ = "roles"
     nombre: Mapped[str] = mapped_column(String(50), unique=True)
     descripcion: Mapped[str | None] = mapped_column(Text, nullable=True)
     activo: Mapped[bool] = mapped_column(Boolean, default=True)
-    usuarios = relationship("Usuario", secondary=usuario_rol, back_populates="roles")
+    usuarios = relationship(
+        "Usuario",
+        secondary=usuario_rol,
+        primaryjoin="Rol.id == usuario_rol.c.rol_id",
+        secondaryjoin="usuario_rol.c.usuario_id == Usuario.id",
+        back_populates="roles"
+    )

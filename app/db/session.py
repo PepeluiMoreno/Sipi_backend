@@ -1,10 +1,12 @@
-import os
+# session.py
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://sipi:sipi@db:5432/sipi")
-engine = create_engine(DATABASE_URL, future=True)
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+# Configuración de la base de datos - actualiza con tu cadena de conexión
+SQLALCHEMY_DATABASE_URL = "postgresql://usuario:password@localhost/nombre_bd"
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 def get_db():
     db = SessionLocal()

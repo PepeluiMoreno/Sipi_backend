@@ -1,3 +1,4 @@
+# base.py
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String, DateTime, Boolean
 from datetime import datetime

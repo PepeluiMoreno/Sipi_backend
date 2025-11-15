@@ -1,0 +1,5 @@
+requests
+requests-toolbelt
+SQLAlchemy
+geoalchemy2
+# Se asume que el usuario ya tiene strawberry y las dependencias de GraphQL
