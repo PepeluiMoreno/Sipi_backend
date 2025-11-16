@@ -5,7 +5,7 @@ import traceback
 import sys
 
 try:
-    from .schema_generic import schema
+    from .schema import schema
     print("✅ Schema GraphQL genérico asíncrono cargado correctamente")
     
     # Debug: mostrar tipos disponibles

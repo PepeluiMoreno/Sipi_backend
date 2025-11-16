@@ -1,5 +1,5 @@
 # models/__init__.py
-from .base import Base, UUIDPKMixin, AuditMixin
+from app.db.base import Base, UUIDPKMixin, AuditMixin
 from .agentes import (
     Adquiriente, Administracion, AdministracionTitular, AgenciaInmobiliaria, AgenciaInmobiliariaTitular,
     ColegioProfesional, Diocesis, DiocesisTitular, Notaria, NotariaTitular,

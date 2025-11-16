@@ -7,7 +7,7 @@ from sqlalchemy import String, Text, Float, Boolean, ForeignKey, Integer, DateTi
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableDict
 from geoalchemy2 import Geometry
-from .base import Base, UUIDPKMixin, AuditMixin
+from app.db.base import Base, UUIDPKMixin, AuditMixin
 
 if TYPE_CHECKING:
     from .geografia import Provincia, Localidad, ComunidadAutonoma

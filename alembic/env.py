@@ -26,7 +26,7 @@ if not database_url:
 # Importación crítica - si falla, mostrar error real y salir
 try:
     from app.db.session import engine
-    from app.db.models.base import Base 
+    from app.db.base import Base 
     target_metadata = Base.metadata
 except Exception as e:
     print(f"❌ ERROR importando modelos SQLAlchemy: {e}")

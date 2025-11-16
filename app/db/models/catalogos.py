@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Text
-from .base import Base, UUIDPKMixin, AuditMixin
+from app.db.base import Base, UUIDPKMixin, AuditMixin
 
 if TYPE_CHECKING:
     from .inmuebles import Inmueble
@@ -102,3 +102,12 @@ class TipoTransmision(UUIDPKMixin, AuditMixin, Base):
     
     # Relaciones
     transmisiones: Mapped[list["Transmision"]] = relationship("Transmision", back_populates="tipo_transmision")
+
+class TipoVia(UUIDPKMixin, AuditMixin, Base):
+    __tablename__ = "tipos_via"
+    
+    nombre: Mapped[str] = mapped_column(String(100), unique=True)
+    descripcion: Mapped[str | None] = mapped_column(Text, nullable=True)
+    
+    # Relaciones
+    inmuebles: Mapped[list["Inmueble"]] = relationship("Inmueble", back_populates="tipo_via")

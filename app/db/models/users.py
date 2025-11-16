@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Text, Boolean, DateTime, ForeignKey, Table, Column
 from datetime import datetime
-from .base import Base, UUIDPKMixin, AuditMixin
+from app.db.base import Base, UUIDPKMixin, AuditMixin
 
 usuario_rol = Table(
     "usuario_rol",
