@@ -1,6 +1,7 @@
-# app/__init__.py
-from .asgi import app
-from .schema import schema
-from .context import get_context
+# __init__.py
+"""
+Sistema automático de generación de GraphQL Schema
+"""
+from app.graphql.schema.schema_main import schema, Query, Mutation
 
-__all__ = ["app", "schema", "get_context"]
+__all__ = ['schema', 'Query', 'Mutation']

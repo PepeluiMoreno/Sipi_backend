@@ -3,6 +3,7 @@ import sys
 from logging.config import fileConfig
 
 from alembic import context
+from sqlalchemy import create_engine
 
 # Hacer que el proyecto sea importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -12,25 +13,22 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-
-# Obtener la URL de la base de datos de la variable de entorno
-
+# Obtener la URL de la base de datos
 database_url = os.getenv("DATABASE_URL")
 if not database_url:
-    # Si no está en variable de entorno, intentar desde alembic.ini
     database_url = config.get_main_option("sqlalchemy.url")
     if not database_url:
-        raise Exception("❌ No se encontró DATABASE_URL en variables de entorno")
+        raise Exception("❌ No se encontró DATABASE_URL")
 
+# ✅ Crear engine directamente aquí
+engine = create_engine(database_url)
 
-# Importación crítica - si falla, mostrar error real y salir
+# Importar solo lo necesario
 try:
-    from app.db.session import engine
     from app.db.base import Base 
     target_metadata = Base.metadata
 except Exception as e:
-    print(f"❌ ERROR importando modelos SQLAlchemy: {e}")
-    print("💡 Revise la sintaxis de los modelos (back_populates, relaciones, etc.)")
+    print(f"❌ ERROR importando modelos: {e}")
     sys.exit(1)
 
 def run_migrations_offline():
