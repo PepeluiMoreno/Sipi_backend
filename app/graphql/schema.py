@@ -5,20 +5,53 @@ Soporta SQLAlchemy, filtros dinámicos, paginación, relaciones y propiedades
 from typing import TypeVar, Generic, Type, Optional, List, Any, Dict, get_args, get_origin, Callable
 from datetime import datetime, date
 from decimal import Decimal
+from dataclasses import dataclass
 import strawberry
 from strawberry.types import Info
-from strawberry.field import StrawberryField
-from sqlalchemy import select, func, and_, or_, asc, desc
-from sqlalchemy.orm import selectinload
+from sqlalchemy import select, func, and_, asc, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.inspection import inspect
-from enum import Enum
+import enum
 import uuid
-import inspect as python_inspect
-from types import MethodType
+import sys
+from functools import wraps
 
 # Importar la Base de datos principal
 from app.db.base import Base
+
+# ==================== FUNCIONES DE COMMON.PY INTEGRADAS ====================
+
+@dataclass
+class Page(Generic[T]):
+    """Estructura de paginación mejorada"""
+    items: List[T]
+    total: int
+    page: int
+    page_size: int
+
+def clamp_limit(limit: Optional[int], default: int = 50, max_limit: int = 200) -> int:
+    """Limita el valor de límite entre 1 y max_limit"""
+    if limit is None:
+        return default
+    return max(1, min(limit, max_limit))
+
+def clamp_offset(offset: Optional[int]) -> int:
+    """Asegura que el offset no sea negativo"""
+    return max(0, offset or 0)
+
+# ==================== FUNCIONES DE ERROR_HANDLING.PY INTEGRADAS ====================
+
+def suppress_traceback_continue(func):
+    """Decorador para suprimir tracebacks pero continuar la ejecución"""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            error_type = type(e).__name__
+            print(f"⚠️  {error_type} en {func.__name__}: {str(e)}", file=sys.stderr)
+            return None
+    return wrapper
 
 # ==================== TIPOS BASE ====================
 
@@ -135,7 +168,7 @@ class PropertyDetector:
                   hasattr(attr, '__name__') and 
                   not attr_name.startswith('_')):
                 # Excluir métodos de SQLAlchemy y métodos especiales
-                excluded_prefixes = ['query', 'metadata', 'register', 'test_']
+                excluded_prefixes = ['query', 'metadata', 'register', 'test_', 'sa_']
                 if not any(attr_name.startswith(prefix) for prefix in excluded_prefixes):
                     properties[attr_name] = {
                         'type': 'method',
@@ -433,7 +466,7 @@ class DynamicQueryBuilder:
             return query, 1, 20
         
         page = max(1, pagination.page)
-        page_size = max(1, min(100, pagination.page_size))
+        page_size = clamp_limit(pagination.page_size, 20, 100)  # ✅ Usando clamp_limit
         
         offset = (page - 1) * page_size
         query = query.limit(page_size).offset(offset)
@@ -501,6 +534,7 @@ class GenericCRUD(Generic[T]):
         
         return strawberry_instance
     
+    @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
     async def get_by_id(self, db: AsyncSession, id: Any) -> Optional[T]:
         """Obtener por ID - maneja diferentes tipos de PK"""
         try:
@@ -522,6 +556,7 @@ class GenericCRUD(Generic[T]):
             print(f"Error obteniendo {self.model.__name__} por ID {id}: {e}")
             return None
     
+    @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
     async def get_all(
         self,
         db: AsyncSession,
@@ -575,6 +610,7 @@ class GenericCRUD(Generic[T]):
             "page_info": page_info
         }
     
+    @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
     async def get_deleted(
         self,
         db: AsyncSession,
@@ -623,6 +659,7 @@ class GenericCRUD(Generic[T]):
             "page_info": page_info
         }
     
+    @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
     async def create(self, db: AsyncSession, data: dict) -> T:
         """Crear nuevo registro"""
         # Si el modelo tiene UUID como PK y no se proporciona, generarlo
@@ -637,6 +674,7 @@ class GenericCRUD(Generic[T]):
         await db.refresh(obj)
         return obj
     
+    @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
     async def update(self, db: AsyncSession, id: Any, data: dict) -> Optional[T]:
         """Actualizar registro existente"""
         obj = await self.get_by_id(db, id)
@@ -651,6 +689,7 @@ class GenericCRUD(Generic[T]):
         await db.refresh(obj)
         return obj
     
+    @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
     async def delete(self, db: AsyncSession, id: Any) -> bool:
         """Eliminar registro (soft delete)"""
         obj = await self.get_by_id(db, id)
@@ -666,6 +705,7 @@ class GenericCRUD(Generic[T]):
         await db.commit()
         return True
     
+    @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
     async def restore(self, db: AsyncSession, id: Any) -> Optional[T]:
         """Restaurar registro eliminado"""
         obj = await self.get_by_id(db, id)
@@ -702,11 +742,13 @@ class SchemaGenerator:
         # Registrar el tipo en globals para que Strawberry lo encuentre
         globals()[response_name] = SpecificPaginatedResponse
         
+        @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
         async def get_one(info: Info, id: strawberry.ID) -> Optional[crud.strawberry_type]:
             db = info.context["db"]
             obj = await crud.get_by_id(db, id)
             return await crud._convert_to_strawberry(obj)
         
+        @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
         async def get_many(
             info: Info,
             filters: Optional[List[FilterCondition]] = None,
@@ -727,6 +769,7 @@ class SchemaGenerator:
                 page_info=result["page_info"]
             )
         
+        @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
         async def get_deleted(
             info: Info,
             filters: Optional[List[FilterCondition]] = None,
@@ -747,6 +790,7 @@ class SchemaGenerator:
                 page_info=result["page_info"]
             )
         
+        @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
         async def get_all(
             info: Info,
             filters: Optional[List[FilterCondition]] = None,
@@ -778,12 +822,14 @@ class SchemaGenerator:
     def generate_mutations(crud: GenericCRUD, name_prefix: str):
         """Genera mutaciones para un CRUD"""
         
+        @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
         async def create_one(info: Info, data: crud.create_input) -> crud.strawberry_type:
             db = info.context["db"]
             data_dict = {k: v for k, v in data.__dict__.items() if v is not None}
             obj = await crud.create(db, data_dict)
             return await crud._convert_to_strawberry(obj)
         
+        @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
         async def update_one(
             info: Info,
             id: strawberry.ID,
@@ -794,10 +840,12 @@ class SchemaGenerator:
             obj = await crud.update(db, id, data_dict)
             return await crud._convert_to_strawberry(obj) if obj else None
         
+        @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
         async def delete_one(info: Info, id: strawberry.ID) -> bool:
             db = info.context["db"]
             return await crud.delete(db, id)
         
+        @suppress_traceback_continue  # ✅ Aplicando decorador de manejo de errores
         async def restore_one(info: Info, id: strawberry.ID) -> Optional[crud.strawberry_type]:
             db = info.context["db"]
             obj = await crud.restore(db, id)

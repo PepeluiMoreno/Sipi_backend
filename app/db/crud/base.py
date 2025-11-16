@@ -1,7 +1,7 @@
 # app/db/crud/base.py
 from typing import Any, Dict, List, Optional, Generic, TypeVar
 from sqlalchemy.orm import Session
-from app.db.models.base import Base
+from app.db.base import Base
 
 ModelType = TypeVar("ModelType", bound=Base)
 
