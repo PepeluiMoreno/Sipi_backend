@@ -11,7 +11,7 @@ usuario_rol = Table(
     Column("rol_id", String(36), ForeignKey("roles.id"), primary_key=True),
     Column("fecha_asignacion", DateTime, default=datetime.utcnow),
     Column("asignado_por", String(36), ForeignKey("usuarios.id"), nullable=True),
-)
+    )
 
 class Usuario(UUIDPKMixin, AuditMixin, Base):
     __tablename__ = "usuarios"
@@ -40,3 +40,6 @@ class Rol(UUIDPKMixin, AuditMixin, Base):
         secondaryjoin="usuario_rol.c.usuario_id == Usuario.id",
         back_populates="roles"
     )
+
+
+

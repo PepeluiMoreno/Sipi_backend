@@ -2,8 +2,8 @@
 from .base import UUIDPKMixin, AuditMixin
 from .identificacion import TipoIdentificacion, IdentificacionMixin
 from .contacto import ContactoMixin, ContactoDireccionMixin
-from .direccion import TipoVia, DireccionMixin, DireccionGeoMixin
-
+from .direccion import DireccionMixin,
+from titular import TitularidadMixin
 __all__ = [
     'UUIDPKMixin',
     'AuditMixin',
@@ -11,7 +11,6 @@ __all__ = [
     'IdentificacionMixin',
     'ContactoMixin',
     'ContactoDireccionMixin',
-    'TipoVia',
     'DireccionMixin',
-    'DireccionGeoMixin'
+    'TitularidadMixin'
 ]

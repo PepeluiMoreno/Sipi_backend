@@ -1,7 +1,7 @@
 # app/db/mixins/contacto.py
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Text
-from db.mixins.direccion import DireccionMixin
+from .direccion import DireccionMixin
 
 class ContactoMixin:
     """
