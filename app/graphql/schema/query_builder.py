@@ -1,95 +1,58 @@
-# query_builder.py
 """
-Constructor dinámico de queries SQLAlchemy
+Construcción de queries y resolvers GraphQL a partir de GenericCRUD
 """
-from typing import Type, Optional, List
-from sqlalchemy import select, func, and_, asc, desc
+from typing import List, Optional, Dict, Any, Callable
+import strawberry
+from strawberry.types import Info
+from .crud_generator import GenericCRUD
+from .type_generator import PropertyResolver, StrawberryTypeGenerator
+from .base_types import FilterCondition, OrderBy, PaginationInput, PageInfo, suppress_traceback_continue
 
-from .base_types import FilterCondition, OrderBy, PaginationInput, clamp_limit
+# ==============================
+# Query Builder
+# ==============================
 
-class DynamicQueryBuilder:
-    """Construye queries SQLAlchemy dinámicamente"""
-    
+class QueryBuilder:
+    """Genera queries y resolvers GraphQL desde GenericCRUD"""
+
     @staticmethod
-    def apply_filters(query, model: Type, filters: Optional[List[FilterCondition]]):
-        """Aplica filtros dinámicos a la query"""
-        if not filters:
-            return query
-        
-        conditions = []
-        for filter_cond in filters:
-            column = getattr(model, filter_cond.field, None)
-            if column is None:
-                continue
-            
-            op = filter_cond.operator
-            value = filter_cond.value
-            values = filter_cond.values
-            
-            if op.value == "eq":
-                conditions.append(column == value)
-            elif op.value == "ne":
-                conditions.append(column != value)
-            elif op.value == "gt":
-                conditions.append(column > value)
-            elif op.value == "gte":
-                conditions.append(column >= value)
-            elif op.value == "lt":
-                conditions.append(column < value)
-            elif op.value == "lte":
-                conditions.append(column <= value)
-            elif op.value == "like":
-                conditions.append(column.like(f"%{value}%"))
-            elif op.value == "ilike":
-                conditions.append(column.ilike(f"%{value}%"))
-            elif op.value == "in":
-                if values:
-                    conditions.append(column.in_(values))
-            elif op.value == "not_in":
-                if values:
-                    conditions.append(~column.in_(values))
-            elif op.value == "is_null":
-                if value:
-                    conditions.append(column.is_(None))
-                else:
-                    conditions.append(column.isnot(None))
-            elif op.value == "between":
-                if values and len(values) == 2:
-                    conditions.append(column.between(values[0], values[1]))
-        
-        if conditions:
-            query = query.where(and_(*conditions))
-        
-        return query
-    
-    @staticmethod
-    def apply_ordering(query, model: Type, order_by: Optional[List[OrderBy]]):
-        """Aplica ordenamiento a la query"""
-        if not order_by:
-            return query
-        
-        for order in order_by:
-            column = getattr(model, order.field, None)
-            if column is None:
-                continue
-            
-            if order.direction.value == "asc":
-                query = query.order_by(asc(column))
-            else:
-                query = query.order_by(desc(column))
-        
-        return query
-    
-    @staticmethod
-    def apply_pagination(query, pagination: Optional[PaginationInput]):
-        """Aplica paginación a la query"""
-        if not pagination:
-            return query, 1, 20
-        
-        page = max(1, pagination.page)
-        page_size = clamp_limit(pagination.page_size, 20, 100)
-        
-        offset = (page - 1) * page_size
-        query = query.limit(page_size).offset(offset)
-        
-        return query, page, page_size
+    def build_queries(crud: GenericCRUD, name_prefix: str = None) -> Dict[str, strawberry.field]:
+        if name_prefix is None:
+            name_prefix = crud.model_name.lower()
+
+        queries = {}
+
+        # Resolver para obtener uno por ID
+        @suppress_traceback_continue
+        async def get_one(info: Info, id: strawberry.ID):
+            db = info.context["db"]
+            instance = await crud.get_by_id(db, id)
+            return await StrawberryTypeGenerator._convert_to_strawberry(instance)
+
+        # Resolver para obtener lista
+        @suppress_traceback_continue
+        async def get_many(
+            info: Info,
+            filters: Optional[List[FilterCondition]] = None,
+            order_by: Optional[List[OrderBy]] = None,
+            pagination: Optional[PaginationInput] = None
+        ):
+            db = info.context["db"]
+            offset = pagination.page * pagination.page_size if pagination else 0
+            limit = pagination.page_size if pagination else 20
+            filter_dict = {f.field: f.value for f in filters} if filters else {}
+            items = await crud.list_all(db, filter_dict, offset, limit)
+            return {
+                "items": [await StrawberryTypeGenerator._convert_to_strawberry(item) for item in items],
+                "page_info": PageInfo(
+                    total=len(items),
+                    page=pagination.page if pagination else 1,
+                    page_size=pagination.page_size if pagination else 20
+                )
+            }
+
+        queries[f"{name_prefix}"] = strawberry.field(resolver=get_one)
+        queries[f"{name_prefix}s"] = strawberry.field(resolver=get_many)
+
+        return queries
+

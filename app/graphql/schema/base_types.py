@@ -1,96 +1,88 @@
 # base_types.py
 """
-Tipos base, enums, inputs y utilidades para el schema GraphQL
+Tipos base y utilidades comunes para GraphQL
 """
-from typing import List, Optional
-import strawberry
-import enum
-import sys
+from typing import List, Optional, Callable, Any
+from enum import Enum
 from functools import wraps
 
-# ==================== TIPOS BASE ====================
 
-@strawberry.type
-class PageInfo:
-    """Información de paginación"""
-    has_next_page: bool
-    has_previous_page: bool
-    total_count: int
-    page: int
-    page_size: int
-    total_pages: int
+class FilterOperator(str, Enum):
+    eq = "eq"
+    ne = "ne"
+    gt = "gt"
+    gte = "gte"
+    lt = "lt"
+    lte = "lte"
+    like = "like"
+    ilike = "ilike"
+    in_ = "in"
+    not_in = "not_in"
+    is_null = "is_null"
+    between = "between"
 
-@strawberry.type
-class PaginatedResponse:
-    """Respuesta paginada genérica"""
-    items: List[str]  # Usar str en lugar de strawberry.scalars.JSON
-    page_info: PageInfo
 
-# ==================== ENUMS GENÉRICOS ====================
-
-@strawberry.enum
-class OrderDirection(enum.Enum):
-    ASC = "asc"
-    DESC = "desc"
-
-@strawberry.enum
-class FilterOperator(enum.Enum):
-    """Operadores para filtros dinámicos"""
-    EQ = "eq"           # Igual
-    NE = "ne"           # No igual
-    GT = "gt"           # Mayor que
-    GTE = "gte"         # Mayor o igual
-    LT = "lt"           # Menor que
-    LTE = "lte"         # Menor o igual
-    LIKE = "like"       # LIKE (case sensitive)
-    ILIKE = "ilike"     # ILIKE (case insensitive)
-    IN = "in"           # IN
-    NOT_IN = "not_in"   # NOT IN
-    IS_NULL = "is_null" # IS NULL
-    BETWEEN = "between" # BETWEEN
-
-# ==================== INPUTS GENÉRICOS ====================
-
-@strawberry.input
 class FilterCondition:
-    """Condición de filtro dinámica"""
     field: str
     operator: FilterOperator
-    value: Optional[str] = None  # Usar str en lugar de strawberry.scalars.JSON
-    values: Optional[List[str]] = None  # Usar str en lugar de strawberry.scalars.JSON
+    value: Any = None
+    values: Optional[List[Any]] = None
 
-@strawberry.input
+    def __init__(self, field: str, operator: FilterOperator, value: Any = None, values: Optional[List[Any]] = None):
+        self.field = field
+        self.operator = operator
+        self.value = value
+        self.values = values
+
+
+class OrderDirection(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
 class OrderBy:
-    """Ordenamiento"""
     field: str
-    direction: OrderDirection = OrderDirection.ASC
+    direction: OrderDirection
 
-@strawberry.input
+    def __init__(self, field: str, direction: OrderDirection = OrderDirection.asc):
+        self.field = field
+        self.direction = direction
+
+
 class PaginationInput:
-    """Input de paginación"""
-    page: int = 1
-    page_size: int = 20
+    page: int
+    page_size: int
 
-# ==================== UTILIDADES ====================
+    def __init__(self, page: int = 1, page_size: int = 20):
+        self.page = max(1, page)
+        self.page_size = clamp_limit(page_size, 20, 100)
 
-def clamp_limit(limit: Optional[int], default: int = 50, max_limit: int = 200) -> int:
-    """Limita el valor de límite entre 1 y max_limit"""
-    if limit is None:
-        return default
-    return max(1, min(limit, max_limit))
 
-def clamp_offset(offset: Optional[int]) -> int:
-    """Asegura que el offset no sea negativo"""
-    return max(0, offset or 0)
+class PageInfo:
+    page: int
+    page_size: int
+    total: int
+    total_pages: int
 
-def suppress_traceback_continue(func):
-    """Decorador para suprimir tracebacks pero continuar la ejecución"""
+    def __init__(self, page: int, page_size: int, total: int):
+        self.page = page
+        self.page_size = page_size
+        self.total = total
+        self.total_pages = (total + page_size - 1) // page_size
+
+
+def clamp_limit(value: int, min_value: int, max_value: int) -> int:
+    return max(min_value, min(max_value, value))
+
+
+def suppress_traceback_continue(func: Callable):
+    """Decorador para que los errores en resolvers no rompan todo el schema"""
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs):
         try:
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
         except Exception as e:
-            error_type = type(e).__name__
-            print(f"⚠️  {error_type} en {func.__name__}: {str(e)}", file=sys.stderr)
+            print(f"[Resolver Error] {e}")
             return None
     return wrapper
+

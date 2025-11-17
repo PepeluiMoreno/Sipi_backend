@@ -1,8 +1,9 @@
 from sqlalchemy import String, DateTime, Boolean
 from datetime import datetime
 import uuid
-from sqlalchemy.orm import Mapped, mapped_column, Optional, Column, ForeignKey, relationship, declared_attr, Integer    
-
+from strawberry import Column, ForeignKey, relationship, declared_attr,Integer
+from sqlalchemy.orm import Mapped, mapped_column
+from typing import Optional
 
 class UUIDPKMixin:
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

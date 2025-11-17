@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Text
-from app.db.base import Base, UUIDPKMixin, AuditMixin
+from app.db.base import Base
+from app.db.mixins import UUIDPKMixin, AuditMixin
 
 if TYPE_CHECKING:
     from .inmuebles import Inmueble
